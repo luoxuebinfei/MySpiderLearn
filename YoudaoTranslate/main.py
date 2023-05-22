@@ -1,3 +1,11 @@
+import json
+
+# 解决decode_data函数中ctx.call的'NoneType' object has no attribute 'replace'报错问题
+import subprocess
+from functools import partial
+
+subprocess.Popen = partial(subprocess.Popen, encoding='utf-8')
+
 import execjs
 import requests
 
@@ -9,6 +17,15 @@ def get_sign():
     ctx = node.compile(js_code, cwd=r'..\node_modules')
     sign = ctx.call("run")
     return sign[0], sign[1]
+
+
+def decode_data(data: str):
+    node = execjs.get()
+    with open("decode.js", encoding='utf-8') as f:
+        js_code = f.read()
+    ctx = execjs.compile(js_code, cwd=r'..\node_modules')
+    text = ctx.call("run", data)
+    return text
 
 
 def spider(k):
@@ -50,8 +67,14 @@ def spider(k):
         "keyfrom": "fanyi.web"
     }
     response = requests.post(url, headers=headers, cookies=cookies, data=data)
+    # print(response.text)
+    return response.text
 
-    print(response.text)
 
-
-spider("blue")
+if __name__ == '__main__':
+    word = input("请输入英文：")
+    x = spider(word)
+    json_text = json.loads(decode_data(x))["dictResult"]["ec"]["word"]["trs"]
+    print("翻译结果：")
+    for i in json_text:
+        print(i["tran"])
