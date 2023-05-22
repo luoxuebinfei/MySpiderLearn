@@ -1,0 +1,57 @@
+import execjs
+import requests
+
+
+def get_sign():
+    node = execjs.get()
+    with open("get_sign.js", encoding='utf-8') as f:
+        js_code = f.read()
+    ctx = node.compile(js_code, cwd=r'..\node_modules')
+    sign = ctx.call("run")
+    return sign[0], sign[1]
+
+
+def spider(k):
+    headers = {
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "zh-CN,zh;q=0.9",
+        "Connection": "keep-alive",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "DNT": "1",
+        "Origin": "https://fanyi.youdao.com",
+        "Referer": "https://fanyi.youdao.com/",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"102\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+    }
+    cookies = {
+        "OUTFOX_SEARCH_USER_ID": "-1070197359@10.105.137.202",
+        "OUTFOX_SEARCH_USER_ID_NCOO": "371334273.2126965"
+    }
+    url = "https://dict.youdao.com/webtranslate"
+    sign, t = get_sign()
+    data = {
+        "i": k,
+        "from": "auto",
+        "to": "",
+        "dictResult": "true",
+        "keyid": "webfanyi",
+        "sign": sign,
+        "client": "fanyideskweb",
+        "product": "webfanyi",
+        "appVersion": "1.0.0",
+        "vendor": "web",
+        "pointParam": "client,mysticTime,product",
+        "mysticTime": t,
+        "keyfrom": "fanyi.web"
+    }
+    response = requests.post(url, headers=headers, cookies=cookies, data=data)
+
+    print(response.text)
+
+
+spider("blue")

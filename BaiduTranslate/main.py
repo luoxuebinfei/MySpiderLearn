@@ -62,9 +62,8 @@ def spider(eng):
     response = requests.post(url, headers=headers, cookies=cookies, params=params, data=data)
     res = json.loads(response.text)
     ch = res['trans_result']['data'][0]['dst']
-    print("翻译结果：",ch)
+    print("翻译结果：", ch)
 
 
 if __name__ == '__main__':
     spider(input("请输入要翻译的英文单词："))
-
