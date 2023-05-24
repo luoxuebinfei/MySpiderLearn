@@ -1,10 +1,21 @@
 import json
 
 # 解决decode_data函数中ctx.call的'NoneType' object has no attribute 'replace'报错问题
-import subprocess
-from functools import partial
+# import subprocess
+# from functools import partial
+#
+# subprocess.Popen = partial(subprocess.Popen, encoding='utf-8')
 
-subprocess.Popen = partial(subprocess.Popen, encoding='utf-8')
+# 第二种方法
+import subprocess
+
+
+class MySubprocessPopen(subprocess.Popen):
+    def __init__(self, *args, **kwargs):
+        super().__init__(encoding="utf-8", *args, **kwargs)
+
+
+subprocess.Popen = MySubprocessPopen
 
 import execjs
 import requests

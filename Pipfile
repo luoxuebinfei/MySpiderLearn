@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 requests = "*"
 pyexecjs = "*"
+cloudscraper = "*"
+requests-toolbelt = "*"
 
 [dev-packages]
 
