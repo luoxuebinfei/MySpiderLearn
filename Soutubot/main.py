@@ -33,6 +33,9 @@ headers = {
     "x-api-key": get_api_key(),
     "x-requested-with": "XMLHttpRequest"
 }
+cookies = {
+    "cf_clearance": ""
+}
 url = "https://soutubot.moe/api/search"
 
 with open("1.png", "rb") as f:
