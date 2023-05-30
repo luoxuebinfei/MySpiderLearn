@@ -1,0 +1,1 @@
+绅士仓库重点是要用已有的cookie去请求一个不需要验证的网址，获取到响应体的`XSRF-TOKEN`和`cangku_laravel_session`,将它们加入到cookie和请求头中
