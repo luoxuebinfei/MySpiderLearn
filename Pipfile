@@ -8,6 +8,7 @@ requests = "*"
 pyexecjs = "*"
 cloudscraper = "*"
 requests-toolbelt = "*"
+pywebview = "*"
 
 [dev-packages]
 

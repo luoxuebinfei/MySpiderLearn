@@ -1,8 +1,33 @@
 import json
+import re
+import sys
+import time
+import urllib
+import http.cookiejar
 
 import execjs
 import requests
 from requests_toolbelt import MultipartEncoder
+import webview
+import cloudscraper
+
+scraper = cloudscraper.create_scraper()  # returns a CloudScraper instance
+
+
+def read_cookies(window):
+    """获取cookie以解决机器人验证"""
+    match = re.search(r"cf_clearance=([^;]+)", str(window.get_cookies()[0]))
+    if match:
+        # 提取匹配到的内容
+        cf_clearance_value = match.group(1)
+        cookies["cf_clearance"] = cf_clearance_value
+        window.destroy()  # 关闭窗口
+
+
+def js(window):
+    """获取ua"""
+    headers["user-agent"] = window.evaluate_js("navigator.userAgent")
+    read_cookies(window)
 
 
 def get_api_key():
@@ -31,36 +56,43 @@ headers = {
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 "
                   "Safari/537.36",
     "x-api-key": get_api_key(),
-    "x-requested-with": "XMLHttpRequest"
+    "x-requested-with": "XMLHttpRequest",
 }
 cookies = {
     "cf_clearance": ""
 }
 url = "https://soutubot.moe/api/search"
 
-with open("1.png", "rb") as f:
-    files = {
-        'filename': "image",
-        'Content-Disposition': 'form-data;',
-        'Content-Type': 'form-data',
-        'file': ('image', f, 'image/jpeg'),
-        'factor': '1.2'
-    }
-    form_data = MultipartEncoder(files, boundary="----WebKitFormBoundaryQMMmxCYA7HY7JFLw")
-    response = requests.post(url, headers=headers, data=form_data)
-    json_res = json.loads(response.text)
 
-for i in json_res["data"]:
-    # print(i)
-    print("匹配度：", i["similarity"])
-    print("标题：", i["title"])
-    print("语言：", i["language"])
-    print("缩略图：", i["previewImageUrl"])
-    print("详情页：", "https://www." + i["source"] + ".net" + i["subjectPath"])
-    if i["pagePath"] is not None:
-        print("详细页面：", "https://www." + i["source"] + ".net" + str(i["pagePath"]))
-    print("\n")
+def img_search():
+    with open("1.png", "rb") as f:
+        files = {
+            'filename': "image",
+            'Content-Disposition': 'form-data;',
+            'Content-Type': 'form-data',
+            'file': ('image', f, 'image/jpeg'),
+            'factor': '1.2'
+        }
+        form_data = MultipartEncoder(files, boundary="----WebKitFormBoundaryQMMmxCYA7HY7JFLw")
+        response = scraper.post(url, headers=headers, data=form_data, cookies=cookies)
+        try:
+            json_res = json.loads(response.text)
+            for i in json_res["data"]:
+                # print(i)
+                print("匹配度：", i["similarity"])
+                print("标题：", i["title"])
+                print("语言：", i["language"])
+                print("缩略图：", i["previewImageUrl"])
+                print("详情页：", "https://www." + i["source"] + ".net" + i["subjectPath"])
+                if i["pagePath"] is not None:
+                    print("详细页面：", "https://www." + i["source"] + ".net" + str(i["pagePath"]))
+                print("\n")
+        except json.decoder.JSONDecodeError as e:
+            """遇到机器人验证"""
+            window = webview.create_window(title="验证", url="https://soutubot.moe")
+            webview.start(js, window, private_mode=False)
+            img_search()
 
-# print(response.headers)
-# print(response)
-# print(get_api_key())
+
+if __name__ == '__main__':
+    img_search()

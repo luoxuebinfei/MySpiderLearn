@@ -22,7 +22,7 @@ cookies = {
 }
 url = "https://api.bilibili.com/x/activity/mission/task/reward/receive"
 data = {
-    "csrf": "",  # 必填项，从cookie中的bili_jct获取
+    "csrf": cookies["bili_jct"],  # 必填项，从cookie中的bili_jct获取
     "act_id": "688",
     "task_id": "2715",
     "group_id": "0",
